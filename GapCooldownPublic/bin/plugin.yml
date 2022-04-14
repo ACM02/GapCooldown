@@ -1,0 +1,10 @@
+name: GapCooldown
+main: me.mc_cloud.gapcooldown.Main
+version: 1.0
+description: God Apple Cooldown plugin
+author: MC_Cloud
+api-version: 1.18
+
+permissions:
+  gapCooldown.ignore:
+    defult: op
