@@ -30,10 +30,16 @@ public class StartEat implements Listener {
 		if (e.getPlayer().hasPermission("gapCooldown.ignore")) return;
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (e.getPlayer().getItemInHand().getType() == Material.ENCHANTED_GOLDEN_APPLE) {
-				if (!Main.cooldowns.containsKey(e.getPlayer().getUniqueId().toString())) return;
-				if (Main.cooldowns.get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
+				if (!Main.enchantedGoldenAppleCooldowns.containsKey(e.getPlayer().getUniqueId().toString())) return;
+				if (Main.enchantedGoldenAppleCooldowns.get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
 					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.cooldowns.get(e.getPlayer().getUniqueId().toString())) + "s");
+					e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.enchantedGoldenAppleCooldowns.get(e.getPlayer().getUniqueId().toString())) + "s");
+				}
+			} else if (e.getPlayer().getItemInHand().getType() == Material.GOLDEN_APPLE) {
+				if (!Main.goldenAppleCooldowns.containsKey(e.getPlayer().getUniqueId().toString())) return;
+				if (Main.goldenAppleCooldowns.get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
+					e.setCancelled(true);
+					e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.goldenAppleCooldowns.get(e.getPlayer().getUniqueId().toString())) + "s");
 				}
 			}
 		}

@@ -19,8 +19,11 @@ public class OnDeath implements Listener {
 	
 	@EventHandler
 	public void onEat(PlayerDeathEvent e) {
-		if (Main.cooldowns.containsKey(e.getEntity().getUniqueId().toString())) {
-			Main.cooldowns.remove(e.getEntity().getUniqueId().toString());
+		if (Main.enchantedGoldenAppleCooldowns.containsKey(e.getEntity().getUniqueId().toString())) {
+			Main.enchantedGoldenAppleCooldowns.remove(e.getEntity().getUniqueId().toString());
+		}
+		if (Main.goldenAppleCooldowns.containsKey(e.getEntity().getUniqueId().toString())) {
+			Main.goldenAppleCooldowns.remove(e.getEntity().getUniqueId().toString());
 		}
 	}
 }

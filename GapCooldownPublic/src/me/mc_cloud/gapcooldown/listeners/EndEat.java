@@ -23,8 +23,10 @@ public class EndEat implements Listener {
 	@EventHandler
 	public void onEat(PlayerItemConsumeEvent e) {
 		if (e.getPlayer().hasPermission("gapCooldown.ignore")) return;
-		if (e.getItem().getType() == Material.ENCHANTED_GOLDEN_APPLE) {
-			Main.cooldowns.put(e.getPlayer().getUniqueId().toString(), Utils.todayPlus(0, 0, 0, Main.COOLDOWN));
+		if (e.getItem().getType() == Material.ENCHANTED_GOLDEN_APPLE && Main.ENCHANTED_GOLDEN_APPLE_COOLDOWN != -1) {
+			Main.enchantedGoldenAppleCooldowns.put(e.getPlayer().getUniqueId().toString(), Utils.todayPlus(0, 0, 0, Main.ENCHANTED_GOLDEN_APPLE_COOLDOWN));
+		} else if (e.getItem().getType() == Material.GOLDEN_APPLE && Main.GOLDEN_APPLE_COOLDOWN != -1) {
+			Main.goldenAppleCooldowns.put(e.getPlayer().getUniqueId().toString(), Utils.todayPlus(0, 0, 0, Main.GOLDEN_APPLE_COOLDOWN));
 		}
 	}
 }
