@@ -8,6 +8,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 
 import me.mc_cloud.gapcooldown.Main;
 import me.mc_cloud.gapcooldown.utils.Utils;
@@ -39,6 +41,20 @@ public class StartEat implements Listener {
 						e.setCancelled(true);
 						if (Main.instance.getConfig().getBoolean("wait-messages.chat")) e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerCooldowns.get(food).get(e.getPlayer().getUniqueId().toString())) + "s");
 						if (Main.instance.getConfig().getBoolean("wait-messages.action-bar")) e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerCooldowns.get(food).get(e.getPlayer().getUniqueId().toString())) + "s"));
+					}
+				}
+			}
+			
+			if (e.getPlayer().getItemInHand().getType() == Material.POTION) {
+				PotionMeta meta = (PotionMeta) e.getPlayer().getItemInHand().getItemMeta();
+				for (PotionType type : Main.potionCooldowns.keySet()) {
+					if (meta.getBasePotionData().getType() == type) {
+						if (!Main.playerPotionCooldowns.get(type).containsKey(e.getPlayer().getUniqueId().toString())) return;
+						if (Main.playerPotionCooldowns.get(type).get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
+							e.setCancelled(true);
+							if (Main.instance.getConfig().getBoolean("wait-messages.chat")) e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerPotionCooldowns.get(type).get(e.getPlayer().getUniqueId().toString())) + "s");
+							if (Main.instance.getConfig().getBoolean("wait-messages.action-bar")) e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerPotionCooldowns.get(type).get(e.getPlayer().getUniqueId().toString())) + "s"));
+						}
 					}
 				}
 			}

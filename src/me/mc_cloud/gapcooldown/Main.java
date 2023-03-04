@@ -6,6 +6,7 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionType;
 
 import me.mc_cloud.gapcooldown.listeners.EndEat;
 import me.mc_cloud.gapcooldown.listeners.StartEat;
@@ -15,6 +16,8 @@ public class Main extends JavaPlugin {
 	
 	/*
 	 * TODO
+	 * Adding drinking potion types to config
+	 * 
 	 * Ideas:
 	 * Option to disable in creative
 	 * Option to disable based on world
@@ -26,6 +29,8 @@ public class Main extends JavaPlugin {
 	
 	public static Map<Material, Map<String, Long>> playerCooldowns = new HashMap<>();
 	public static Map<Material, Integer> itemCooldowns = new HashMap<>();
+	public static Map<PotionType, Integer> potionCooldowns = new HashMap<>();
+	public static Map<PotionType, Map<String, Long>> playerPotionCooldowns = new HashMap<>();
 	//public static Map<String, Long> enchantedGoldenAppleCooldowns = new HashMap<String, Long>();
 	//public static int ENCHANTED_GOLDEN_APPLE_COOLDOWN = 0;
 	//public static Map<String, Long> goldenAppleCooldowns = new HashMap<String, Long>();
@@ -38,6 +43,9 @@ public class Main extends JavaPlugin {
 			Material.POTATO, Material.PUFFERFISH, Material.PUMPKIN_PIE, Material.RABBIT_STEW, Material.BEEF, Material.CHICKEN, Material.COD, Material.MUTTON,
 			Material.PORKCHOP, Material.RABBIT, Material.SALMON, Material.ROTTEN_FLESH, Material.SPIDER_EYE, Material.SUSPICIOUS_STEW, Material.SWEET_BERRIES,
 			Material.TROPICAL_FISH};
+	
+	public static final PotionType[] EFFECTS = PotionType.values();
+	
 	
 	public static Main instance;
 	
@@ -64,6 +72,14 @@ public class Main extends JavaPlugin {
 			if (cooldown != 0) {
 				playerCooldowns.put(material, new HashMap<String, Long>());
 				itemCooldowns.put(material, cooldown);
+			}
+		}
+		
+		for (PotionType potionType : EFFECTS) {
+			int cooldown = config.getInt("potion." + potionType.toString().toLowerCase() + ".cooldown");
+			if (cooldown != 0) {
+				potionCooldowns.put(potionType, cooldown);
+				playerPotionCooldowns.put(potionType, new HashMap<String, Long>());
 			}
 		}
 		
