@@ -16,7 +16,6 @@ public class Main extends JavaPlugin {
 	
 	/*
 	 * TODO
-	 * Adding drinking potion types to config
 	 * 
 	 * Ideas:
 	 * Option to disable in creative
