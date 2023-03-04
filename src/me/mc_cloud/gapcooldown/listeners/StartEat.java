@@ -12,6 +12,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import me.mc_cloud.gapcooldown.Main;
 import me.mc_cloud.gapcooldown.utils.Utils;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 
 
 public class StartEat implements Listener {
@@ -29,17 +31,15 @@ public class StartEat implements Listener {
 	public void onEat(PlayerInteractEvent e) {
 		if (e.getPlayer().hasPermission("gapCooldown.ignore")) return;
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			if (e.getPlayer().getItemInHand().getType() == Material.ENCHANTED_GOLDEN_APPLE) {
-				if (!Main.enchantedGoldenAppleCooldowns.containsKey(e.getPlayer().getUniqueId().toString())) return;
-				if (Main.enchantedGoldenAppleCooldowns.get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
-					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.enchantedGoldenAppleCooldowns.get(e.getPlayer().getUniqueId().toString())) + "s");
-				}
-			} else if (e.getPlayer().getItemInHand().getType() == Material.GOLDEN_APPLE) {
-				if (!Main.goldenAppleCooldowns.containsKey(e.getPlayer().getUniqueId().toString())) return;
-				if (Main.goldenAppleCooldowns.get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
-					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.goldenAppleCooldowns.get(e.getPlayer().getUniqueId().toString())) + "s");
+			
+			for (Material food : Main.itemCooldowns.keySet()) {
+				if (e.getPlayer().getItemInHand().getType() == food) {
+					if (!Main.playerCooldowns.get(food).containsKey(e.getPlayer().getUniqueId().toString())) return;
+					if (Main.playerCooldowns.get(food).get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
+						e.setCancelled(true);
+						if (Main.instance.getConfig().getBoolean("wait-messages.chat")) e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerCooldowns.get(food).get(e.getPlayer().getUniqueId().toString())) + "s");
+						if (Main.instance.getConfig().getBoolean("wait-messages.action-bar")) e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerCooldowns.get(food).get(e.getPlayer().getUniqueId().toString())) + "s"));
+					}
 				}
 			}
 		}
