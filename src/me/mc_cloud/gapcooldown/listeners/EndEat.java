@@ -14,30 +14,31 @@ import me.mc_cloud.gapcooldown.utils.Utils;
 
 public class EndEat implements Listener {
 	
-	public Main plugin;
+	private Main plugin;
 	
 	public EndEat(Main plugin) {
 		this.plugin = plugin;
-		
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 	
 	@EventHandler
 	public void onEat(PlayerItemConsumeEvent e) {
-		if (e.getPlayer().hasPermission("gapCooldown.ignore")) return;
-		
-		for (Material food : Main.itemCooldowns.keySet()) {
-			if (e.getItem().getType() == food) {
-				Main.playerCooldowns.get(food).put(e.getPlayer().getUniqueId().toString(), Utils.todayPlus(0, 0, 0, Main.itemCooldowns.get(food)));
-			}
+		Player player = e.getPlayer();
+		if (player.hasPermission("gapCooldown.ignore")) return;
+		String playerUuid = player.getUniqueId().toString();
+
+		Material eatedItem = e.getItem().getType();
+		if (plugin.itemCooldowns.keySet().contains(eatedItem)) {
+			Long nextEatAllowed = Utils.todayPlus(0, 0, 0, plugin.itemCooldowns.get(eatedItem));
+			plugin.playerCooldowns.get(food).put(playerUuid, nextEatAllowed));
 		}
-		
+
 		if (e.getItem().hasItemMeta() && e.getItem().getItemMeta() instanceof PotionMeta) {
-			for (PotionType type : Main.potionCooldowns.keySet()) {
-				PotionMeta meta = (PotionMeta) e.getItem().getItemMeta();
-				if (meta.getBasePotionData().getType() == type) {
-					Main.playerPotionCooldowns.get(type).put(e.getPlayer().getUniqueId().toString(), Utils.todayPlus(0, 0, 0, Main.potionCooldowns.get(type)));
-				}
+			PotionMeta potionMeta = (PotionMeta) e.getItem().getItemMeta();
+			PotionType potionType = potionMeta.getBasePotionType();
+			if (plugin.potionCooldowns.keySet().contains(potionType)) {
+				Long nextDrinkAllowed = Utils.todayPlus(0, 0, 0, plugin.potionCooldowns.get(potionType));
+				plugin.playerPotionCooldowns.get(potionType).put(playerUuid, nextDrinkAllowed));
 			}
 		}
 	}
