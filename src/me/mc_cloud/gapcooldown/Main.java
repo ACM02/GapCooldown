@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
 
 import me.mc_cloud.gapcooldown.listeners.EndEat;
+import me.mc_cloud.gapcooldown.listeners.OnDeath;
 import me.mc_cloud.gapcooldown.listeners.StartEat;
 import me.mc_cloud.gapcooldown.utils.UpdateChecker;
 
@@ -43,7 +44,6 @@ public class Main extends JavaPlugin {
 	
 	public static Main instance;
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -62,6 +62,7 @@ public class Main extends JavaPlugin {
 		});
 	}
 
+	@SuppressWarnings("deprecation")
 	private void registerConfig() {
 		FileConfiguration config = getConfig();
 		
@@ -78,6 +79,7 @@ public class Main extends JavaPlugin {
 	}
 
 	private void populateMapConfig() {
+		FileConfiguration config = getConfig();
 		for (Material material : FOODS) {
 			int cooldown = config.getInt(material.toString().toLowerCase() + ".cooldown");
 			if (cooldown > 0) {

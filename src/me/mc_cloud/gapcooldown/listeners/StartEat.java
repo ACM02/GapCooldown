@@ -1,21 +1,21 @@
 package me.mc_cloud.gapcooldown.listeners;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionType;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.potion.PotionType;
 
 import me.mc_cloud.gapcooldown.Main;
-import me.mc_cloud.gapcooldown.utils.Utils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -35,19 +35,21 @@ public class StartEat implements Listener {
 		if (e.getPlayer().hasPermission("gapCooldown.ignore")) return;
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			PlayerInventory playerInventory = e.getPlayer().getInventory();
-			Material mainHandItem = playerInventory.getItemInMainHand();
-			Material offHandItem = playerInventory.getItemInOffHand();
+			ItemStack mainHandItem = playerInventory.getItemInMainHand();
+			ItemStack offHandItem = playerInventory.getItemInOffHand();
 			if (areCooldownForThisFood(mainHandItem)) {
-				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerCooldowns.get(mainHandItem), e.getPlayer())); 
+				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerCooldowns.get(mainHandItem.getType()), e.getPlayer())); 
 			}
 			if (areCooldownForThisFood(offHandItem)) {
-				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerCooldowns.get(offHandItem), e.getPlayer())); 
+				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerCooldowns.get(offHandItem.getType()), e.getPlayer())); 
 			}
 			if (areCooldownForThisPotion(mainHandItem)) {
-				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerPotionCooldowns.get(mainHandItem), e.getPlayer());
+				PotionMeta meta = (PotionMeta) mainHandItem.getItemMeta();
+				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerPotionCooldowns.get(meta.getBasePotionData().getType()), e.getPlayer()));
 			}
 			if (areCooldownForThisPotion(offHandItem)) {
-				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerPotionCooldowns.get(mainHandItem), e.getPlayer());
+				PotionMeta meta = (PotionMeta) mainHandItem.getItemMeta();
+				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerPotionCooldowns.get(meta.getBasePotionData().getType()), e.getPlayer()));
 			}
 		}
 	}
@@ -59,7 +61,7 @@ public class StartEat implements Listener {
 	private boolean areCooldownForThisPotion(ItemStack itemInHand) {
 		if (itemInHand.getType().equals(Material.POTION)) {
 			PotionMeta potionMeta = (PotionMeta) itemInHand.getItemMeta();
-			return plugin.playerPotionCooldowns.keySet().contains(potionMeta.getBasePotionType());
+			return plugin.playerPotionCooldowns.keySet().contains(potionMeta.getBasePotionData().getType());
 		}
 		return false;
 	}
