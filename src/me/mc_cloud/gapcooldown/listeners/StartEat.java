@@ -9,6 +9,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionType;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionType;
 
 import me.mc_cloud.gapcooldown.Main;
@@ -20,43 +23,69 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class StartEat implements Listener {
 	
-	public Main plugin;
+	private Main plugin;
 	
 	public StartEat(Main plugin) {
 		this.plugin = plugin;
-		
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onEat(PlayerInteractEvent e) {
 		if (e.getPlayer().hasPermission("gapCooldown.ignore")) return;
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			
-			for (Material food : Main.itemCooldowns.keySet()) {
-				if (e.getPlayer().getItemInHand().getType() == food) {
-					if (!Main.playerCooldowns.get(food).containsKey(e.getPlayer().getUniqueId().toString())) return;
-					if (Main.playerCooldowns.get(food).get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
-						e.setCancelled(true);
-						if (Main.instance.getConfig().getBoolean("wait-messages.chat")) e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerCooldowns.get(food).get(e.getPlayer().getUniqueId().toString())) + "s");
-						if (Main.instance.getConfig().getBoolean("wait-messages.action-bar")) e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerCooldowns.get(food).get(e.getPlayer().getUniqueId().toString())) + "s"));
-					}
-				}
+			PlayerInventory playerInventory = e.getPlayer().getInventory();
+			Material mainHandItem = playerInventory.getItemInMainHand();
+			Material offHandItem = playerInventory.getItemInOffHand();
+			if (areCooldownForThisFood(mainHandItem)) {
+				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerCooldowns.get(mainHandItem), e.getPlayer())); 
 			}
-			
-			if (e.getPlayer().getItemInHand().getType() == Material.POTION) {
-				PotionMeta meta = (PotionMeta) e.getPlayer().getItemInHand().getItemMeta();
-				for (PotionType type : Main.potionCooldowns.keySet()) {
-					if (meta.getBasePotionData().getType() == type) {
-						if (!Main.playerPotionCooldowns.get(type).containsKey(e.getPlayer().getUniqueId().toString())) return;
-						if (Main.playerPotionCooldowns.get(type).get(e.getPlayer().getUniqueId().toString()) > new Date().getTime()) {
-							e.setCancelled(true);
-							if (Main.instance.getConfig().getBoolean("wait-messages.chat")) e.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerPotionCooldowns.get(type).get(e.getPlayer().getUniqueId().toString())) + "s");
-							if (Main.instance.getConfig().getBoolean("wait-messages.action-bar")) e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.RED + "That item is on cooldown. Try again in " + Utils.secsUntil(Main.playerPotionCooldowns.get(type).get(e.getPlayer().getUniqueId().toString())) + "s"));
-						}
-					}
-				}
+			if (areCooldownForThisFood(offHandItem)) {
+				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerCooldowns.get(offHandItem), e.getPlayer())); 
+			}
+			if (areCooldownForThisPotion(mainHandItem)) {
+				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerPotionCooldowns.get(mainHandItem), e.getPlayer());
+			}
+			if (areCooldownForThisPotion(offHandItem)) {
+				cancelEventIfNeeded(e, getPlayerCooldown(plugin.playerPotionCooldowns.get(mainHandItem), e.getPlayer());
+			}
+		}
+	}
+
+	private boolean areCooldownForThisFood(ItemStack itemInHand) {
+		return plugin.itemCooldowns.keySet().contains(itemInHand.getType());
+	}
+
+	private boolean areCooldownForThisPotion(ItemStack itemInHand) {
+		if (itemInHand.getType().equals(Material.POTION)) {
+			PotionMeta potionMeta = (PotionMeta) itemInHand.getItemMeta();
+			return plugin.playerPotionCooldowns.keySet().contains(potionMeta.getBasePotionType());
+		}
+		return false;
+	}
+	
+	private Long getPlayerCooldown(Map<String, Long> playerItemCooldowns, Player player) {
+		String playerUuid = player.getUniqueId().toString();
+		if (playerItemCooldowns.containsKey(playerUuid)) {
+			Long lastEat = playerItemCooldowns.get(playerUuid);
+			if (lastEat > new Date().getTime()) {
+				return lastEat - new Date().getTime();
+			}
+		}
+		return 0l;
+	}
+
+	private void cancelEventIfNeeded(PlayerInteractEvent event, Long cooldown) {
+		if (cooldown > 0) {
+			event.setCancelled(true);
+			FileConfiguration config = plugin.getConfig();
+			int cooldownSec = (int) (cooldown / 1000);
+			if (config.getBoolean("wait-messages.chat")) {
+				event.getPlayer().sendMessage(ChatColor.RED + "That item is on cooldown. Try again in " + cooldownSec + "s");
+			}
+			if (config.getBoolean("wait-messages.action-bar")) {
+				event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR,
+					TextComponent.fromLegacyText(ChatColor.RED + "That item is on cooldown. Try again in " + cooldownSec + "s"));	
 			}
 		}
 	}
