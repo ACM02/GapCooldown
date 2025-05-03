@@ -15,21 +15,17 @@ public class OnDeath implements Listener {
 	
 	public OnDeath(Main plugin) {
 		this.plugin = plugin;
-		
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 	
 	@EventHandler
 	public void onEat(PlayerDeathEvent e) {
-		for (Material food : Main.itemCooldowns.keySet()) {
-			if (Main.playerCooldowns.get(food).containsKey(e.getEntity().getUniqueId().toString())) {
-				Main.playerCooldowns.get(food).remove(e.getEntity().getUniqueId().toString());
-			}
+		String entityUuid = e.getEntity().getUniqueId().toString();
+		for (Material food : plugin.itemCooldowns.keySet()) {
+			plugin.playerCooldowns.get(food).remove(entityUuid);
 		}
-		for (PotionType type : Main.potionCooldowns.keySet()) {
-			if (Main.playerPotionCooldowns.get(type).containsKey(e.getEntity().getUniqueId().toString())) {
-				Main.playerPotionCooldowns.get(type).remove(e.getEntity().getUniqueId().toString());
-			}
+		for (PotionType type : plugin.potionCooldowns.keySet()) {
+			plugin.playerPotionCooldowns.get(type).remove(entityUuid);
 		}
 	}
 }
